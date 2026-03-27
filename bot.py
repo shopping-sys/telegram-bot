@@ -1,22 +1,20 @@
 import os
-from google import genai
+import google.generativeai as genai
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
 
     try:
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=user_text
-        )
-        reply = response.text if response.text else "တောင်းပန်ပါတယ်၊ response မရပါ။"
+        response = model.generate_content(user_text)
+        reply = response.text if response.text else "ဘာမှမပြန်နိုင်ပါ"
         await update.message.reply_text(reply)
     except Exception as e:
         await update.message.reply_text(f"Error: {str(e)}")
