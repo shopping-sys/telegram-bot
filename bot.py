@@ -1,36 +1,44 @@
 import os
-from google import genai
+import tempfile
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+from faster_whisper import WhisperModel
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+model = WhisperModel("base")  # small / medium / large
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text
+async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    video = update.message.video
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=user_text
-        )
-        reply = response.text if response.text else "တောင်းပန်ပါတယ်၊ response မရပါ။"
-        await update.message.reply_text(reply)
-    except Exception as e:
-        await update.message.reply_text(f"Error: {str(e)}")
+    if not video:
+        await update.message.reply_text("Video မတွေ့ဘူး")
+        return
+
+    await update.message.reply_text("📥 Video download လုပ်နေတယ်...")
+
+    file = await context.bot.get_file(video.file_id)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
+        await file.download_to_drive(temp_video.name)
+        video_path = temp_video.name
+
+    await update.message.reply_text("🎧 Audio → Subtitle ပြောင်းနေတယ်...")
+
+    segments, _ = model.transcribe(video_path)
+
+    subtitle_text = ""
+    for segment in segments:
+        start = int(segment.start)
+        end = int(segment.end)
+        subtitle_text += f"[{start}s - {end}s]\n{segment.text}\n\n"
+
+    await update.message.reply_text(subtitle_text[:4000])  # Telegram limit
 
 def main():
-    if not TELEGRAM_BOT_TOKEN:
-        print("Missing TELEGRAM_BOT_TOKEN")
-        return
-    if not GEMINI_API_KEY:
-        print("Missing GEMINI_API_KEY")
-        return
-
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    app.add_handler(MessageHandler(filters.VIDEO, handle_video))
 
     print("Bot running...")
     app.run_polling()
