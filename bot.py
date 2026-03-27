@@ -1,37 +1,42 @@
 import os
-import asyncio
-from google import genai # Library အသစ်
+from google import genai
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-# ၁။ Gemini Client အသစ် Setup
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-MODEL_ID = "gemini-1.5-flash"
+# ၁။ API Key (ဒီနေရာမှာ ကိုယ့် Key ကို တိုက်ရိုက်ထည့်တာ ပိုသေချာပါတယ်)
+API_KEY = "မင်းရဲ့_GEMINI_API_KEY_ဒီမှာထည့်" 
+client = genai.Client(api_key=API_KEY)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text
-    if not user_text: return
-
-    # User ကို ခဏစောင့်ဖို့ ပြောမယ်
+    # စာသား မဟုတ်ရင် ပြန်ထွက်မယ်
+    if not update.message.text: return
+    
+    # User ကို ခဏစောင့်ခိုင်းမယ်
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
 
     try:
         # ၂။ Gemini ဆီက အဖြေတောင်းခြင်း
         response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=user_text
+            model="gemini-1.5-flash",
+            contents=update.message.text
         )
-        await update.message.reply_text(response.text)
+        
+        if response.text:
+            await update.message.reply_text(response.text)
+        else:
+            await update.message.reply_text("Gemini က အဖြေမပေးနိုင်ပါဘူး။")
+            
     except Exception as e:
-        print(f"Error: {e}")
-        await update.message.reply_text("ခဏလေးနော်၊ အလုပ်များနေလို့ပါ။")
+        # Error အစစ်ကို Telegram မှာ မြင်ရအောင် လုပ်ထားပါတယ်
+        await update.message.reply_text(f"Error တက်သွားပါတယ်: {str(e)}")
 
 if __name__ == '__main__':
-    # ၃။ Telegram Bot Setup
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    # ၃။ Telegram Token
+    TOKEN = "မင်းရဲ့_TELEGRAM_BOT_TOKEN_ဒီမှာထည့်"
     app = ApplicationBuilder().token(TOKEN).build()
     
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     
-    print("Bot is starting...")
-    app.run_polling(drop_pending_updates=True) # တစ်ခြားနေရာမှာ Run နေတာရှိရင် ဖယ်ထုတ်ပေးတယ်
+    print("Bot စတင်လည်ပတ်ပါပြီ...")
+    # drop_pending_updates က အရင်က ပိတ်မိနေတဲ့ message တွေကို ရှင်းထုတ်ပေးတယ်
+    app.run_polling(drop_pending_updates=True)
