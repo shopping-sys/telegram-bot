@@ -18,7 +18,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             contents=update.message.text,
             config=types.GenerateContentConfig(
                 safety_settings=[
-                    types.SafetySetting(category="HATE_SPEECH", threshold="BLOCK_NONE"),
+                    types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="BLOCK_NONE"),
                     types.SafetySetting(category="HARASSMENT", threshold="BLOCK_NONE"),
                 ]
             )
