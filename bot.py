@@ -31,4 +31,4 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
     app.add_handler(MessageHandler(filters.VIDEO, handle_video))
-    app.run_polling()
+    app.run_polling() 
