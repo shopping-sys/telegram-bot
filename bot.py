@@ -13,10 +13,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         response = client.models.generate_content(
-            model="gemini-3-flash-preview",
+            model="gemini-1.5-flash",
             contents=user_text,
         )
-        reply = response.text if response.text else "တောင်းပန်ပါတယ်၊ response မရပါ။"
+        reply = response.text if response.text else "ဘာမှမပြန်နိုင်ပါ"
         await update.message.reply_text(reply)
     except Exception as e:
         await update.message.reply_text(f"Error: {str(e)}")
