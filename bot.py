@@ -1,34 +1,30 @@
 import os
-import google.generativeai as genai
+import google.generativeai as genai  # Gemini အတွက်
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-# Setup Gemini
-genai.configure(api_key="မင်းရဲ့_GEMINI_API_KEY")
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Gemini Setup လုပ်ခြင်း
+# API_KEY ကို Environment Variable ထဲမှာ ထည့်ထားတာ ပိုစိတ်ချရပါတယ်
+genai.configure(api_key=os.getenv("GEMINI_API_KEY")) 
+model = genai.GenerativeModel('gemini-1.5-flash') # <--- ဒီမှာ Flash ပြောင်းတာပါ
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     video = update.message.video
-    if not video: return
+    
+    # စောင့်ဆိုင်းနေစဉ် Message ပို့ထားမယ်
+    status_msg = await update.message.reply_text("🚀 Gemini Flash က အလုပ်လုပ်နေပါပြီ...")
 
-    wait_msg = await update.message.reply_text("⏳ Gemini က Video ကို စစ်ဆေးနေပါတယ်...")
-
-    # Video ကို Download ဆွဲခြင်း
+    # Video ကို ယာယီ Download ဆွဲခြင်း
     file = await context.bot.get_file(video.file_id)
     video_path = f"{video.file_id}.mp4"
     await file.download_to_drive(video_path)
 
-    # Gemini ဆီသို့ Video ပို့ပြီး Transcript တောင်းခြင်း
-    sample_file = genai.upload_file(path=video_path)
-    response = model.generate_content([sample_file, "Summarize this video or transcribe the audio."])
+    # Gemini ဆီပို့ပြီး အသံကို စာသားပြောင်းခိုင်းခြင်း (သို့မဟုတ်) Summary လုပ်ခြင်း
+    video_file = genai.upload_file(path=video_path)
+    response = model.generate_content([video_file, "Please transcribe the audio or summarize this video."])
 
-    # အဖြေပြန်ပို့ခြင်း
-    await wait_msg.edit_text(response.text)
-    
-    # ဖိုင်ပြန်ဖျက်ခြင်း (Storage မပြည့်အောင်)
+    # အဖြေပြန်ပို့ပြီး ယာယီဖိုင်ကို ဖျက်ခြင်း
+    await status_msg.edit_text(response.text)
     os.remove(video_path)
 
-if __name__ == '__main__':
-    app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
-    app.add_handler(MessageHandler(filters.VIDEO, handle_video))
-    app.run_polling() 
+# ကျန်တဲ့ main() function ကတော့ အတူတူပါပဲ
