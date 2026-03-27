@@ -1,47 +1,34 @@
 import os
-import tempfile
+import google.generativeai as genai
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
-from faster_whisper import WhisperModel
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
-model = WhisperModel("base")  # small / medium / large
+# Setup Gemini
+genai.configure(api_key="မင်းရဲ့_GEMINI_API_KEY")
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     video = update.message.video
+    if not video: return
 
-    if not video:
-        await update.message.reply_text("Video မတွေ့ဘူး")
-        return
+    wait_msg = await update.message.reply_text("⏳ Gemini က Video ကို စစ်ဆေးနေပါတယ်...")
 
-    await update.message.reply_text("📥 Video download လုပ်နေတယ်...")
-
+    # Video ကို Download ဆွဲခြင်း
     file = await context.bot.get_file(video.file_id)
+    video_path = f"{video.file_id}.mp4"
+    await file.download_to_drive(video_path)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
-        await file.download_to_drive(temp_video.name)
-        video_path = temp_video.name
+    # Gemini ဆီသို့ Video ပို့ပြီး Transcript တောင်းခြင်း
+    sample_file = genai.upload_file(path=video_path)
+    response = model.generate_content([sample_file, "Summarize this video or transcribe the audio."])
 
-    await update.message.reply_text("🎧 Audio → Subtitle ပြောင်းနေတယ်...")
+    # အဖြေပြန်ပို့ခြင်း
+    await wait_msg.edit_text(response.text)
+    
+    # ဖိုင်ပြန်ဖျက်ခြင်း (Storage မပြည့်အောင်)
+    os.remove(video_path)
 
-    segments, _ = model.transcribe(video_path)
-
-    subtitle_text = ""
-    for segment in segments:
-        start = int(segment.start)
-        end = int(segment.end)
-        subtitle_text += f"[{start}s - {end}s]\n{segment.text}\n\n"
-
-    await update.message.reply_text(subtitle_text[:4000])  # Telegram limit
-
-def main():
-    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-
+if __name__ == '__main__':
+    app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
     app.add_handler(MessageHandler(filters.VIDEO, handle_video))
-
-    print("Bot running...")
     app.run_polling()
-
-if __name__ == "__main__":
-    main()
