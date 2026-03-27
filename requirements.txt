@@ -1,4 +1,2 @@
 python-telegram-bot
-google-genai
-faster-whisper
-ffmpeg-python
+google-generativeai
