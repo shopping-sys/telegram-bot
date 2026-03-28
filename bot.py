@@ -6,7 +6,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filte
 genai.configure(api_key="AIzaSyBz_p52d7IBKuCf-TIgnXYuXAa7d9U39jM")
 
 # Model ကို နာမည်အပြည့်အစုံနဲ့ ခေါ်ကြည့်ပါ
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+model = genai.GenerativeModel("models/gemini-2.5-flash")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
