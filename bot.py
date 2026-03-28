@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
 # ၁။ Gemini API Key
-genai.configure(api_key="AizasyAp54QILRrcmZlx0R13ber47wtEniykDYA")
+genai.configure(api_key="AIzaSyBz_p52d7IBKuCf-TIgnXYuXAa7d9U39jM")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
