@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
 # ၁။ API Key အသစ်ကို ဒီမှာ ထည့်ပါ
-genai.configure(api_key="AIzaSyBz_p52d7IBKuCf-TIgnXYuXAa7d9U39jM")
+genai.configure(api_key="AIzaSyDRp11oxZlNflcgO1544gUPunL5-yZmS6U")
 
 # Model ကို နာမည်အပြည့်အစုံနဲ့ ခေါ်ကြည့်ပါ
 model = genai.GenerativeModel("models/gemini-2.5-flash")
