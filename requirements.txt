@@ -1,2 +1,2 @@
 google-generativeai
-python-telegram-bot
+python-telegram-bot --upgrade
