@@ -21,7 +21,7 @@ logging.basicConfig(
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 HF_TOKEN = os.getenv("HF_TOKEN")
-SPACE_HOST = os.getenv("SPACE_HOST")  # e.g. eipwint-joy-bot.hf.space
+SPACE_HOST = "eipwint-joy-bot-2.hf.space"  # e.g. eipwint-joy-bot.hf.space
 
 if not TELEGRAM_BOT_TOKEN:
     raise ValueError("Missing TELEGRAM_BOT_TOKEN")
@@ -29,11 +29,9 @@ if not GOOGLE_API_KEY:
     raise ValueError("Missing GOOGLE_API_KEY")
 if not HF_TOKEN:
     raise ValueError("Missing HF_TOKEN")
-if not SPACE_HOST:
-    raise ValueError("Missing SPACE_HOST")
 
 genai.configure(api_key=GOOGLE_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 HF_MODEL = "google/flan-t5-base"
 
 def ask_huggingface(prompt: str) -> str:
