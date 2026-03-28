@@ -29,7 +29,7 @@ if not HF_TOKEN:
     raise ValueError("Missing HF_TOKEN")
 
 genai.configure(api_key=GOOGLE_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 HF_MODEL = "google/flan-t5-base"
 
