@@ -29,7 +29,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     # ၂။ Telegram Bot Token ကို ဒီမှာ ထည့်ပါ
-    TOKEN = "8734152863:AAFNZWBpwHpzFNN3LPwar9VI7aijq8gs5jA"
+    TOKEN = "8473779952:AAGqWhA-9xYjQU0nVyGLmRPNXlQ-RSFEZag"
     
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
